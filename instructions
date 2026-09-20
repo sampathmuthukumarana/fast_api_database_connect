@@ -1,0 +1,95 @@
+1. first create a project using fastapi web site
+   visit (https://fastapi.tiangolo.com/tutorial/first-steps/)
+2. create main.py file and add the code which is in fastapi site under first steps.
+3. then go to guidelines in https://fastapi.tiangolo.com/tutorial/sql-databases/
+   which is related to sql databases.
+4. read https://docs.sqlalchemy.org/en/20/intro.html#installation
+5. install sqlalchemy using terminal
+    uv add "sqlalchemy >= 2.0"
+6. to create my sql connection
+     visit https://pypi.org/project/PyMySQL/
+     run  uv add " PyMySQL[rsa]"
+7. check above installed dependencies  in pyproject.toml
+8. open  my sql console : C:\Program Files\MySQL\MySQL Shell 8.0\bin\mysqlsh
+9. open mysql workbench UI as well
+10. open power shell run
+    mysqlsh -u root -p
+    local root pwd is 12345678
+ 11. if you are in js mode type  \sql and press enter in powershell
+      you will goo to  MySQL  localhost:33060+ ssl  SQL >
+ 12. to create a db type
+      create database fastapi_database_app_db;
+ 13.if you have  to face situation like this press ctrl+ c
+                                     -> \c
+                                 -> C
+                                 -> q
+                                 -> show databases;
+ 14. then type show databases; (semicolon is must)
+ 15. MySQL  localhost:33060+ ssl  SQL >
+       use fastapi_database_app_db;
+          Default schema set to `fastapi_database_app_db`.
+ 16 type show tables;
+ 17. open mysql data base from pycharm by pressing + icon
+      in the database icon in pycharm
+ 18. type user as root, pwd as 12345678, database as  fastapi_database_app_db,
+     and test the connection. if it asks to install drivers do so and
+     it wll connect to the db. press apply and ok.
+ 19. short cut key for search action window in pycham
+     Ctrl + Shift + A
+ 20.now we have to create database connection from code level to the app
+ 21. create config.py file and env file.
+ 22. add following to the .env file
+    MYSQL_USER=root
+    MYSQL_PASSWORD=12345678
+    MYSQL_HOST=localhost
+    MYSQL_DATABASE=fastapi_database_app_db
+    MYSQL_PORT=3306
+
+  23. check whether pydantic setting is there in the project
+      by typing this in the terminal (uv tree) what pydantic setting doing
+      is making above env keys into a text.
+
+  24. add following in the config.py
+from urllib.parse import quote_plus
+
+from pydantic_settings import BaseSettings,SettingsConfigDict
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file='.env')
+
+    mysql_user: str
+    mysql_password: str
+    mysql_host: str
+    mysql_port: int
+    mysql_database: str
+
+    def database_url(self) -> str:
+        return (
+            f"mysql+pymysql://{self.mysql_user}:{quote_plus(self.mysql_password)}"
+            f"@{self.mysql_host}:{self.mysql_port}/{self.mysql_database}"
+        )
+settings = Settings()
+
+print(settings.model_config.items())
+  25. uv run python config.py
+  26. visit https://docs.sqlalchemy.org/en/20/orm/quickstart.html#create-an-engine
+  27. create new file called python check_database.py
+     from sqlalchemy import create_engine, text
+from config import settings
+
+engine = create_engine(settings.database_url)
+
+with engine.connect() as connection:
+    connection.execute(text("select 1"))
+
+print("connection is successful|")
+
+28. comment out following line in config.py
+   # print(settings.model_config.items())
+
+29. run uv run python check_database.py
+   outpt should be: connection is successful|
+
+
+
+
