@@ -7,3 +7,5 @@ with engine.connect() as connection:
     connection.execute(text("select 1"))
 
 print("connection is successful|")
+
+# test commit
