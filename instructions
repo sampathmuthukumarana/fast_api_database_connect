@@ -88,7 +88,7 @@ print("connection is successful|")
    # print(settings.model_config.items())
 
 29. run uv run python check_database.py
-   outpt should be: connection is successful|
+   output should be: connection is successful|
 
 
 
