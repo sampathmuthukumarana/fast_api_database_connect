@@ -100,7 +100,7 @@ print("connection is successful|")
 
         engine = create_engine(
             settings.database_url,
-            echo='false',
+            echo=False,
             pool_pre_ping=True,
             pool_recycle=3600
         )
@@ -154,7 +154,7 @@ print("connection is successful|")
 
         engine = create_engine(
             settings.database_url,
-            echo='false',
+            echo=False,
             pool_pre_ping=True,
             pool_recycle=3600
         )
@@ -178,6 +178,37 @@ print("connection is successful|")
             finally:
                 db.close()
 
+40. create a models.py class to add data model classes
+41. first create User model class and inherit base class as follows
+     and define the table name as well
 
+     from database import Base
 
+      class User(Base):
+           __tablename__ = 'users'
 
+42.  whole models.py
+        from sqlalchemy import String
+
+        from database import Base
+        from sqlalchemy.orm import Mapped
+        from sqlalchemy.orm import mapped_column
+
+        class User(Base):
+            __tablename__ = 'users'
+
+            id: Mapped[int] = mapped_column(primary_key=True)
+            name: Mapped[str] = mapped_column(String(30))
+            email: Mapped[str] = mapped_column(String(30), unique=True)
+            age: Mapped[int]
+
+43. create execute_model.py
+        import models
+        from database import Base,engine
+
+        Base.metadata.create_all(bind=engine)
+
+        print("Table created")
+
+44. run uv run python execute_model.py
+     user table should be created
