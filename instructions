@@ -91,6 +91,59 @@ print("connection is successful|")
         uv run python check_database.py
         output should be: connection is successful|
 
+30. rename the file check_database.py as database.py
+31. visit sql alchemy and raad orm documentation.
+     https://docs.sqlalchemy.org/en/20/tutorial/engine.html
+32. update the database.py as follows.
+            from sqlalchemy import create_engine, text
+        from config import settings
+
+        engine = create_engine(
+            settings.database_url,
+            echo='false',
+            pool_pre_ping=True,
+            pool_recycle=3600
+        )
+
+            # Test connection
+        # with engine.connect() as connection:
+        #     connection.execute(text("select 1"))
+        #
+        # print("connection is successful|")
+
+33. to learn how to use ORM Declarative Forms
+    visit: https://docs.sqlalchemy.org/en/20/tutorial/metadata.html
+
+34. create session in database.py
+     sessionLocal= sessionmaker (bind=engine, autoflush=False, expire_on_commit=True)
+
+35. create session -> yield db -> use route_db(in main.py binds the request into session)->route finish->continue yield -> close session(close yield db)
+
+    sessionLocal= sessionmaker (bind=engine, autoflush=False, expire_on_commit=True)
+
+    def get_db():
+        db = sessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+36. main .py
+        from fastapi import FastAPI
+        from fastapi.params import Depends
+        from sqlalchemy.orm import Session
+
+        from database import get_db
+
+        app = FastAPI()
 
 
+        # @app.get("/")
+        # async def get_users(db:Session = Depends(get_db)):
+        #     # return {"message": "Hello World"}
+        #       return db.query(User).all()
+
+37. Using ORM Declarative Forms to Define Table Metadata
+     visit visit: https://docs.sqlalchemy.org/en/20/tutorial/metadata.html
+38.  import  DeclarativeBase in database.py as follows
+      from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
