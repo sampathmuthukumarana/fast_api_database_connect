@@ -212,3 +212,132 @@ print("connection is successful|")
 
 44. run uv run python execute_model.py
      user table should be created
+
+
+     CRUD
+
+ 45. update main.py a follows
+            from fastapi import FastAPI
+            from fastapi.params import Depends
+            from sqlalchemy.orm import Session
+
+            from database import get_db
+
+            app = FastAPI()
+
+
+            # @app.get("/")
+            # async def get_users(db:Session = Depends(get_db)):
+            #     # return {"message": "Hello World"}
+            #       return db.query(User).all()
+
+            @app.get("/")
+            async def get_root():
+                return {"message": "Hello World"}
+
+            @app.post("/user")
+            async def create_user():
+                return {"message": "User created"}
+
+46. Create a file called schemas.py
+        from pydantic import BaseModel, EmailStr, Field
+        class UserCreate(BaseModel):
+            name: str = Field(min_length=1, max_length=50)
+            age: int = Field(ge=1 , le=80)
+            email: EmailStr
+47. visit pydantic validation doc
+     https://pydantic.dev/docs/validation/dev/concepts/models/
+     field validation : https://pydantic.dev/docs/validation/dev/concepts/fields/
+48. import that schemas file into main.py so that get the schemas paylaod
+            @app.post("/user")
+        async def create_user(payload: UserCreate):
+            return {"message": "User created"}
+49. main.py
+        from fastapi import FastAPI
+
+        import models
+        from schemas import UserCreate, UserResponse
+        from fastapi import Depends
+        from sqlalchemy.orm import Session
+
+        from database import get_db
+
+        app = FastAPI()
+
+
+        # @app.get("/")
+        # async def get_users(db:Session = Depends(get_db)):
+        #     # return {"message": "Hello World"}
+        #       return db.query(User).all()
+
+        @app.get("/")
+        async def get_root():
+            return {"message": "Hello World"}
+
+        @app.post("/user", response_model=UserResponse)
+        async def create_user(payload: UserCreate, database: Session = Depends(get_db)):
+          new_user = models.User(**payload.model_dump())
+          database.add(new_user)
+          database.commit()
+
+          return new_user
+
+50. map response : update schemas.py
+        from pydantic import BaseModel, EmailStr, Field
+
+
+
+        class UserCreate(BaseModel):
+            name: str = Field(min_length=1, max_length=50)
+            age: int = Field(ge=1 , le=80)
+            email: EmailStr
+
+        class UserResponse(BaseModel):
+            name: str
+            age: int
+            user_id: int = Field(validation_alias='id')
+
+51. Retrieve users
+     visit : https://docs.sqlalchemy.org/en/21/orm/quickstart.html#simple-select
+
+52. update main.py
+         from fastapi import FastAPI
+        from sqlalchemy import select
+
+        import models
+        from schemas import UserCreate, UserResponse
+        from fastapi import Depends
+        from sqlalchemy.orm import Session
+
+        from database import get_db
+
+        app = FastAPI()
+
+
+        # @app.get("/")
+        # async def get_users(db:Session = Depends(get_db)):
+        #     # return {"message": "Hello World"}
+        #       return db.query(User).all()
+
+        @app.get("/")
+        async def get_root():
+            return {"message": "Hello World"}
+
+        @app.post("/user", response_model=UserResponse)
+        async def create_user(payload: UserCreate, database: Session = Depends(get_db)):
+          new_user = models.User(**payload.model_dump())
+          database.add(new_user)
+          database.commit()
+
+          return new_user
+
+        @app.get("/users", response_model=list[UserResponse])
+        async def get_all_users(database: Session = Depends(get_db), skip: int = 0, limit: int = 10):
+            return  database.scalars(select(models.User).offset(skip).limit(limit)).all()
+
+53. update schemas.py
+      class UserResponse(BaseModel):
+        # model_config = ConfigDict(from_attributes=True)
+        name: str
+        age: int
+        user_id: int = Field(validation_alias="id")
